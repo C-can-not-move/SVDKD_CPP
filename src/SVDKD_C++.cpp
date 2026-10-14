@@ -94,6 +94,22 @@ int main(int argc, char** argv) {
     std::cout << "  max|err|      : " << gerr << '\n';
     check(gerr < 1e-10, "svdvals 反向可用，且 == U @ Vh",
         "Python 那边测出来是 0.000e+00");
+    
+    // ---- 加在第 5 节里（U2 / S2 / Vh2 就在上面）----
+    {
+        const int64_t k = U2.size(-1);                     // = 5，跟着 U2 走
+        const auto    Id = torch::eye(k, U2.options());     // ★ 跟 U2 同 dtype 同 device
+        const auto    G = U2.transpose(-2, -1).matmul(U2); // (k,k)
+
+        std::cout << "  U2 " << U2.sizes()
+            << "   UᵀU " << G.sizes()
+            << "   Id " << Id.sizes() << '\n';        // ★ 把 shape 打出来
+
+        const double e = (G - Id).abs().max().item<double>();
+        check(e < 1e-12, "UᵀU == I_k  (thin SVD 的 U 是列正交)",
+            "max|err| = " + std::to_string(e));
+    }
+    
 
     // ---------------------------------------------------------------- 6
     section("6. 在 GPU 上真的执行（本机 sm_75 / 服务器 sm_89）");
