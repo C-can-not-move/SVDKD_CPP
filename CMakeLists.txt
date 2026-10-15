@@ -30,7 +30,9 @@ set(APP_SOURCES
     "src/data/cifar10.h"
     "src/data/cifar10.cpp"  
     "src/model/resnet.h" 
-    "src/model/resnet.cpp" 
+    "src/model/resnet.cpp"
+    "src/kd/my_svd.h"
+    "src/kd/my_svd.cpp"
 )
 add_executable(SVDKD_C++ ${APP_SOURCES})
 
