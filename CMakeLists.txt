@@ -25,8 +25,12 @@ message(STATUS "libtorch: ${TORCH_INSTALL_PREFIX}   (${Torch_VERSION})")
 set(APP_SOURCES
     "src/SVDKD_C++.h"
     "src/SVDKD_C++.cpp"
+    "src/config.cpp" 
+    "src/config.h"
     "src/data/cifar10.h"
     "src/data/cifar10.cpp"  
+    "src/model/resnet.h" 
+    "src/model/resnet.cpp" 
 )
 add_executable(SVDKD_C++ ${APP_SOURCES})
 
