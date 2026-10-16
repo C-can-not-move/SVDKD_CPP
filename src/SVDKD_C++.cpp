@@ -12,6 +12,6 @@ int  main(int argc, char** argv)
 	SetConsoleCP(CP_UTF8);         // 输入（读中文时要）
 #endif
 
-	std::cout << "SVD-KD C++ demo" << std::endl;
+	std::cout << "SVD-KD C++ demo！" << std::endl;
 	return 0;
 }
