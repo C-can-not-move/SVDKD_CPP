@@ -11,7 +11,7 @@ namespace svdkd::kd
         torch::Tensor ce;        // 交叉熵:学生 logits vs 标签 (交叉熵CrossEntropy)
         torch::Tensor teacher;   // 蒸馏项:学生 logits vs 教师 logits (KL散度)
         torch::Tensor prop;      // 特征蒸馏项:学生 h vs 教师 h (KL散度)
-        torch::Tensor delta;     // 正则项Δ:奇异值特征λ差的 MSE*超参(4*(1-lambda_stu)*MSE(features))
+        torch::Tensor delta;     // 正则项Δ:奇异值特征λ差的 超参*MSE(4*(1-lambda_stu)*MSE(features))
         torch::Tensor total;     // 四项之和 —— 只有它需要 backward
     };
 
