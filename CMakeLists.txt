@@ -33,6 +33,8 @@ set(APP_SOURCES
     "src/model/resnet.cpp"
     "src/kd/my_svd.h"
     "src/kd/my_svd.cpp"
+    "src/kd/loss.h"
+    "src/kd/loss.cpp"
 )
 add_executable(SVDKD_C++ ${APP_SOURCES})
 
