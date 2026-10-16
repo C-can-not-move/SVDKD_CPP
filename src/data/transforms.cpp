@@ -201,15 +201,19 @@ namespace svdkd::data
 		{
 			const auto box = random_crop_box(H, W);
 
-			auto one = crop_resize(x.select(0, n), box, out_size);
-
+			// 旧的错误用法：auto one = crop_resize(x.select(0, n), box, out_size);
+			// ★ narrow 保留维度 ⇒ (1, C, H, W)。
+			//   select 会降成 (C,H,W)，而 bilinear 的 interpolate 只收 4 维。
+		    auto one = crop_resize(x.narrow(0, n, 1), box, out_size);
 			if (torch::rand({ 1 }).item<float>() < kFlipP)
 			{
-				one = torch::flip(one, { 2 });      // (C, S, S) 的最后一位是宽度
+				// 旧的错误用法：one = torch::flip(one, { 2 });      // (C, S, S) 的最后一位是宽度
+				one = torch::flip(one, { -1 });     // 最后一维 = 宽度（与秩无关）
 			}
 
 			// 这里可以放心用 copy_：out 是刚 empty 出来的普通张量，没有requires_grad，不会碰「leaf 张量不能原地改」那条检查。
-			out.select(0, n).copy_(one);
+			// 旧的错误用法：out.select(0, n).copy_(one);
+			out.narrow(0, n, 1).copy_(one);
 		}
 
 		return normalize(out, norm);

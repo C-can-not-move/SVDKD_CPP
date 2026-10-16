@@ -2,6 +2,7 @@
 #pragma once
 
 #include <torch/torch.h>
+#include <torch/optim.h>
 #include "model/resnet.h"
 
 #include <cstdint>
@@ -12,7 +13,6 @@ namespace svdkd::train
 	{
 		int64_t epochs = 3;            // 代码中是1
 		int64_t batch_size = 32;       // 按代码（论文写 128）
-		double  lr = 1e-4;             // 按代码（论文写 1e-3）
 		int64_t out_size = 224;        // 照抄
 		int64_t resize_to = 256;       // 照抄（验证链）
 		bool    drop_last = false;     // 照抄 DataLoader 的默认（最后一批留着）
@@ -33,5 +33,6 @@ namespace svdkd::train
 		const torch::Tensor& train_labels,   // int64 (N)
 		const torch::Tensor& val_images,
 		const torch::Tensor& val_labels,
+		torch::optim::Optimizer& optimizer, 
 		const TrainConfig& cfg);
 }  // namespace svdkd::train
