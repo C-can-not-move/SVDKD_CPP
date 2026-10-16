@@ -37,6 +37,8 @@ set(APP_SOURCES
     "src/kd/my_svd.cpp"
     "src/kd/loss.h"
     "src/kd/loss.cpp"
+    "src/train/trainer.h"
+    "src/train/trainer.cpp"
 )
 add_executable(SVDKD_C++ ${APP_SOURCES})
 
