@@ -120,9 +120,17 @@ namespace svdkd::train
                 }
 
                 const double acc = (total > 0)? static_cast<double>(correct) / static_cast<double>(total) : 0.0;
+               
+                res.final_val_acc = acc;
                 if (acc > res.best_val_acc)
                 {
                     res.best_val_acc = acc;
+                    res.best_epoch = epoch;
+
+                    if (cfg.save_path.has_value())
+                    {
+						//save_flat(model, *cfg.save_path);      // TODO: 先不存了，免得每轮都写磁盘
+                    }
                 }
 
                 std::cout << "[epoch " << epoch << "/" << cfg.epochs << "]"

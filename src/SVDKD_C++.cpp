@@ -14,13 +14,22 @@ int main()
 
 	try
 	{
-		const auto device = torch::cuda::is_available()? torch::Device(torch::kCUDA, 0): torch::Device(torch::kCPU);
-		std::cout << "[device] " << device << std::endl;
-
 		namespace fs = std::filesystem;
-		torch::manual_seed(2026);
+		const auto rc = svdkd::cfg::defaults();
 
-		const fs::path data_dir = R"(D:\DATA\CODE\C++\SVDKD_C++\dataset\cifar-10-batches-bin)";
+		const fs::path data_dir = rc.data_dir;
+		fs::create_directories(rc.out_dir);
+		torch::manual_seed(rc.seed);
+		
+		const auto device = (rc.device_index >= 0 && torch::cuda::is_available())
+			? torch::Device(torch::kCUDA, rc.device_index)
+			: torch::Device(torch::kCPU);
+
+		std::cout << "[cfg] data_dir = " << rc.data_dir << "\n"
+			<< "[cfg] out_dir  = " << rc.out_dir << "\n"
+			<< "[cfg] device   = " << device
+			<< "  (requested " << rc.device_index << ")\n"
+			<< "[cfg] seed     = " << rc.seed << std::endl;
 
 		std::cout << "[train] loading" << std::endl;
 
@@ -44,9 +53,10 @@ int main()
 		torch::optim::Adam optimizer(net->parameters(), torch::optim::AdamOptions(1e-4));
 
 		svdkd::train::TrainConfig cfg;
-		cfg.epochs = 2;
+		cfg.epochs = 100;
 		cfg.batch_size = 32;
 		cfg.log_every = 5;
+		cfg.save_path = rc.out_dir + "/resnet10-cifar10.pt";
 
 		const auto r = svdkd::train::train_classifier(
 			net,
@@ -56,7 +66,7 @@ int main()
 			val.labels,
 			optimizer,
 			cfg);
-		std::cout << "\nbest_val_acc = " << r.best_val_acc << "    last_train_loss = " << r.last_train_loss << std::endl;
+		r.print();
 		return 0;
 	}
 	catch (const c10::Error& e)

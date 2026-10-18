@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "config.h"
 #include "data/cifar10.h"
 #include "data/transforms.h"
 #include "model/resnet.h"

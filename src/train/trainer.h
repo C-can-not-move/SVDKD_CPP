@@ -3,26 +3,42 @@
 
 #include <torch/torch.h>
 #include <torch/optim.h>
+
 #include "model/resnet.h"
 
 #include <cstdint>
+#include <optional>
+#include <iostream>
+#include <string>
 
 namespace svdkd::train
 {
 	struct TrainConfig
 	{
-		int64_t epochs = 3;            // 代码中是1
+		int64_t epochs = 20;           // 原论文代码中是1
 		int64_t batch_size = 32;       // 按代码（论文写 128）
 		int64_t out_size = 224;        // 照抄
 		int64_t resize_to = 256;       // 照抄（验证链）
 		bool    drop_last = false;     // 照抄 DataLoader 的默认（最后一批留着）
 		int64_t log_every = 50;        // 每多少批打一行
+		std::optional<std::string> save_path;  // 有值就保存模型
 	};
 
 	struct TrainResult
 	{
-		double best_val_acc = 0.0;
-		double last_train_loss = 0.0;
+		double  best_val_acc = 0.0;   // 最好那一次的验证准确率
+		int64_t best_epoch = 0;       // 它出现在第几轮 —— 收敛判据：== epochs 说明还没收敛
+		double  final_val_acc = 0.0;  // 最后一轮 —— 和 best 差得远 = 在震荡
+		double  last_train_loss = 0.0;
+
+		void print() const
+		{
+			std::cout << "best_val_acc = " << best_val_acc
+				<< "  (epoch " << best_epoch << ")"
+				<< "   final_val_acc = " << final_val_acc
+				<< "   last_train_loss = " << last_train_loss << '\n';
+		}
+
 	};
 
 	// 从头训一个分类器。
