@@ -19,6 +19,9 @@ namespace svdkd::train
     {
         using namespace svdkd::data;
 
+        // 设备跟着模型走
+        const auto device = model->parameters().front().device();
+
         TORCH_CHECK(train_images.dim() == 4, "train: expect (N, C, H, W)");
         TORCH_CHECK(train_images.size(0) == train_labels.size(0),"train: images / labels count mismatch");
         TORCH_CHECK(train_images.scalar_type() == torch::kUInt8,"train: expect uint8 images, got ", train_images.scalar_type());
@@ -68,10 +71,10 @@ namespace svdkd::train
 
                 const auto idx = perm.narrow(0, start, len);// idx 装的是「编号」—— 不是「位置」
 
-                const auto xb = train_images.index_select(0, idx);   // uint8 (len,3,32,32)
-                const auto yb = train_labels.index_select(0, idx);
+                const auto xb = train_images.index_select(0, idx);   // // 仍是 CPU uint8 (len,3,32,32)
+                const auto yb = train_labels.index_select(0, idx).to(device);
 
-                const auto xf = transform_train(xb, norm, cfg.out_size);
+                const auto xf = transform_train(xb, norm, cfg.out_size).to(device);;
 
 				// 纯净训练循环：前向 ⇒ loss ⇒ 反向 ⇒ 更新
                 optimizer.zero_grad();
@@ -107,9 +110,9 @@ namespace svdkd::train
                     const int64_t len = std::min(cfg.batch_size, VN - start);
 
                     const auto xb = val_images.narrow(0, start, len);
-                    const auto yb = val_labels.narrow(0, start, len);
+                    const auto yb = val_labels.narrow(0, start, len).to(device);
 
-                    const auto xf = transform_val(xb, norm, cfg.resize_to, cfg.out_size);
+                    const auto xf = transform_val(xb, norm, cfg.resize_to, cfg.out_size).to(device);
                     const auto pred = model->forward(xf).logits.argmax(1);
 
                     correct += pred.eq(yb).sum().item<int64_t>();
