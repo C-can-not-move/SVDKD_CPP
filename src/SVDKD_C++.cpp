@@ -12,59 +12,81 @@ int main()
 	SetConsoleCP(CP_UTF8);
 #endif
 
-	try
+	// 测试GPU
+	std::cout << "[device] cuda available = " << torch::cuda::is_available()
+		<< "   device_count = " << static_cast<int>(torch::cuda::device_count()) << std::endl;
+
+	if (torch::cuda::is_available())
 	{
-		namespace fs = std::filesystem;
-		torch::manual_seed(2026);
+		// 测试算一次。
+		const auto a = torch::rand({ 256, 256 });
+		const auto b = torch::rand({ 256, 256 });
 
-		const fs::path data_dir = R"(D:\DATA\CODE\C++\SVDKD_C++\dataset\cifar-10-batches-bin)";
+		const auto ref = a.matmul(b);
+		const auto got = a.to(torch::kCUDA).matmul(b.to(torch::kCUDA)).to(torch::kCPU);
 
-		std::cout << "[train] loading" << std::endl;
-
-		auto train = svdkd::data::load_cifar10_bin(data_dir.string(), /*train=*/true);
-		auto val = svdkd::data::load_cifar10_bin(data_dir.string(), /*train=*/false);
-
-		// ★ 冒烟：只切一小撮。想跑全量就把这四行删掉。
-		const int64_t kTrain = 640;
-		const int64_t kVal = 320;
-		train.images = train.images.narrow(0, 0, kTrain);
-		train.labels = train.labels.narrow(0, 0, kTrain);
-		val.images = val.images.narrow(0, 0, kVal);
-		val.labels = val.labels.narrow(0, 0, kVal);
-
-		std::cout << "[train] train " << train.images.sizes() << " " << train.images.scalar_type()
-			<< "   val " << val.images.sizes() << std::endl;
-
-		// 顺序：先模型，再优化器。
-		auto net = svdkd::model::h_resnet10(/*num_classes=*/10);
-		torch::optim::Adam optimizer(net->parameters(), torch::optim::AdamOptions(1e-4));
-
-		svdkd::train::TrainConfig cfg;
-		cfg.epochs = 2;
-		cfg.batch_size = 32;
-		cfg.log_every = 5;
-
-		const auto r = svdkd::train::train_classifier(
-			net,
-			train.images,
-			train.labels,
-			val.images,
-			val.labels,
-			optimizer,
-			cfg);
-		std::cout << "\nbest_val_acc = " << r.best_val_acc << "    last_train_loss = " << r.last_train_loss << std::endl;
-		return 0;
+		std::cout << "[device] matmul round-trip max|diff| = "
+			<< (got - ref).abs().max().item<float>() << std::endl;
 	}
-	catch (const c10::Error& e)
+
+	bool system_test = false;
+	if (system_test)
 	{
-		std::cout << "\n[c10::Error]\n" << e.what() << std::endl;
-		return 1;
+		try
+		{
+			namespace fs = std::filesystem;
+			torch::manual_seed(2026);
+
+			const fs::path data_dir = R"(D:\DATA\CODE\C++\SVDKD_C++\dataset\cifar-10-batches-bin)";
+
+			std::cout << "[train] loading" << std::endl;
+
+			auto train = svdkd::data::load_cifar10_bin(data_dir.string(), /*train=*/true);
+			auto val = svdkd::data::load_cifar10_bin(data_dir.string(), /*train=*/false);
+
+			// ★ 冒烟：只切一小撮。想跑全量就把这四行删掉。
+			const int64_t kTrain = 640;
+			const int64_t kVal = 320;
+			train.images = train.images.narrow(0, 0, kTrain);
+			train.labels = train.labels.narrow(0, 0, kTrain);
+			val.images = val.images.narrow(0, 0, kVal);
+			val.labels = val.labels.narrow(0, 0, kVal);
+
+			std::cout << "[train] train " << train.images.sizes() << " " << train.images.scalar_type()
+				<< "   val " << val.images.sizes() << std::endl;
+
+			// 顺序：先模型，再优化器。
+			auto net = svdkd::model::h_resnet10(/*num_classes=*/10);
+			torch::optim::Adam optimizer(net->parameters(), torch::optim::AdamOptions(1e-4));
+
+			svdkd::train::TrainConfig cfg;
+			cfg.epochs = 2;
+			cfg.batch_size = 32;
+			cfg.log_every = 5;
+
+			const auto r = svdkd::train::train_classifier(
+				net,
+				train.images,
+				train.labels,
+				val.images,
+				val.labels,
+				optimizer,
+				cfg);
+			std::cout << "\nbest_val_acc = " << r.best_val_acc << "    last_train_loss = " << r.last_train_loss << std::endl;
+			return 0;
+		}
+		catch (const c10::Error& e)
+		{
+			std::cout << "\n[c10::Error]\n" << e.what() << std::endl;
+			return 1;
+		}
+		catch (const std::exception& e)
+		{
+			std::cout << "\n[std::exception]\n" << e.what() << std::endl;
+			return 1;
+		}
 	}
-	catch (const std::exception& e)
-	{
-		std::cout << "\n[std::exception]\n" << e.what() << std::endl;
-		return 1;
-	}
+	
 
 
 	return 0;
