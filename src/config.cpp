@@ -8,7 +8,7 @@ namespace svdkd::cfg
 #ifdef _WIN32
 		c.data_dir = "D:/DATA/CODE/C++/SVDKD_C++/dataset/cifar-10-batches-bin";
 #else
-		c.data_dir = "./dataset/cifar-10-batches-bin";
+		c.data_dir = "/home/chenzhijiang/userFile/dataset_all/cifar-10-batches-bin";
 #endif
 		return c;
 	}
