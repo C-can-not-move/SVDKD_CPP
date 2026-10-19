@@ -24,7 +24,7 @@ endif()
 list(APPEND CMAKE_PREFIX_PATH "${LIBTORCH_ROOT}")
 find_package(Torch REQUIRED)
 message(STATUS "libtorch: ${TORCH_INSTALL_PREFIX}   (${Torch_VERSION})")
-
+message(STATUS "TORCH_CXX_FLAGS = [${TORCH_CXX_FLAGS}]")
 
 
 # ==================== 目标 ====================
