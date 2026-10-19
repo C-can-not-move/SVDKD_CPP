@@ -20,7 +20,6 @@ if(WIN32)
 else()
     set(LIBTORCH_ROOT "/home/chenzhijiang/userFile/C++_lib/libtorch")
     set(CUDA_TOOLKIT_ROOT_DIR "/home/chenzhijiang/userFile/miniConda3/envs/cuda126/targets/x86_64-linux")
-    set(CMAKE_CUDA_COMPILER "/home/chenzhijiang/userFile/miniConda3/envs/cuda126/targets/x86_64-linux/bin/nvcc" CACHE FILEPATH "CUDA compiler")
     set(CMAKE_CUDA_FLAGS "-I${CUDA_TOOLKIT_ROOT_DIR}/include" CACHE STRING "CUDA flags")
 endif()
 
