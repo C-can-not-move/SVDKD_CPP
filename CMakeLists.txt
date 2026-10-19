@@ -19,6 +19,7 @@ if(WIN32)
     set(LIBTORCH_ROOT "D:/DATA/C++_lib/libtorch_cu126")
 else()
     set(LIBTORCH_ROOT "/home/chenzhijiang/userFile/C++_lib/libtorch")
+    set(CUDA_TOOLKIT_ROOT_DIR "/home/chenzhijiang/userFile/miniConda3/envs/cuda126")
 endif()
 
 list(APPEND CMAKE_PREFIX_PATH "${LIBTORCH_ROOT}")
