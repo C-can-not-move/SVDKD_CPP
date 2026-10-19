@@ -365,3 +365,4 @@ FodyWeavers.xsd
 # 用户自定义
 dataset/
 test_tools/refs/
+run/

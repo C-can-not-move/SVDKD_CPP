@@ -33,13 +33,14 @@ set(APP_SOURCES
     "src/data/transforms.cpp"
     "src/model/resnet.h" 
     "src/model/resnet.cpp"
+    "src/model/checkpoint.cpp" 
+    "src/model/checkpoint.h"
     "src/kd/my_svd.h"
     "src/kd/my_svd.cpp"
     "src/kd/loss.h"
     "src/kd/loss.cpp"
     "src/train/trainer.h"
-    "src/train/trainer.cpp"
-)
+    "src/train/trainer.cpp")
 add_executable(SVDKD_C++ ${APP_SOURCES})
 
 # ==================== target 属性（必须在 add_executable 之后）====================

@@ -4,6 +4,7 @@
 #include "data/cifar10.h"
 #include "data/transforms.h"
 #include "model/resnet.h"
+#include "model/checkpoint.h"
 #include "kd/my_svd.h"
 #include "kd/loss.h"
 #include "train/trainer.h"
@@ -14,4 +15,4 @@
 #include <filesystem>
 #include <iostream>
 #include <string>
-
+#include <algorithm>

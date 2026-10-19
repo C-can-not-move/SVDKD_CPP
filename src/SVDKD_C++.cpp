@@ -66,7 +66,43 @@ int main()
 			val.labels,
 			optimizer,
 			cfg);
+
+		// 内存里现在是【最后一轮】，不是最好的。
+		// 要真的用上 best，得把它读回来 —— 否则「存了最好的」等于没存。
+		if (cfg.save_path.has_value() && r.best_epoch > 0)
+		{
+			svdkd::model::load_checkpoint(net, *cfg.save_path);
+			std::cout << "[ckpt] restored best (epoch " << r.best_epoch << ")\n";
+		}
+
+		// 恢复后核一次：同一份权重 + 同一份验证集 ⇒ 应该精确等于 best_val_acc。
+		{
+			torch::NoGradGuard no_grad;
+			net->eval();
+
+			const auto norm_v = svdkd::data::imagenet_norm();
+			int64_t correct = 0, total = 0;
+
+			for (int64_t s = 0; s < val.images.size(0); s += cfg.batch_size)
+			{
+				const int64_t len = std::min(cfg.batch_size, val.images.size(0) - s);
+
+				const auto xb = val.images.narrow(0, s, len);
+				const auto yb = val.labels.narrow(0, s, len).to(device);
+				const auto xf = svdkd::data::transform_val(xb, norm_v, cfg.resize_to, cfg.out_size).to(device);
+
+				const auto pred = net->forward(xf).logits.argmax(1);
+				correct += pred.eq(yb).sum().item<int64_t>();
+				total += len;
+			}
+
+			std::cout << "[ckpt] verify after restore: " << correct << "/" << total
+				<< " = " << static_cast<double>(correct) / total
+				<< "   (应 == " << r.best_val_acc << ")\n";
+		}
+
 		r.print();
+
 		return 0;
 	}
 	catch (const c10::Error& e)

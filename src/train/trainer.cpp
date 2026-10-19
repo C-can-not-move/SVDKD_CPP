@@ -1,6 +1,7 @@
 ﻿#include "train/trainer.h"
 
 #include "data/transforms.h"
+#include "model/checkpoint.h"
 
 #include <algorithm>
 #include <iostream>
@@ -129,7 +130,7 @@ namespace svdkd::train
 
                     if (cfg.save_path.has_value())
                     {
-						//save_flat(model, *cfg.save_path);      // TODO: 先不存了，免得每轮都写磁盘
+                        svdkd::model::save_checkpoint(model, *cfg.save_path);
                     }
                 }
 
