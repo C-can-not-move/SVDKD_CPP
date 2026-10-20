@@ -89,12 +89,12 @@ int main(int argc, char** argv)
 			const auto norm_v = svdkd::data::imagenet_norm();
 			int64_t correct = 0, total = 0;
 
-			for (int64_t s = 0; s < val.images.size(0); s += cfg.batch_size)
+			for (int64_t s = 0; s < val_x.size(0); s += cfg.batch_size)
 			{
-				const int64_t len = std::min(cfg.batch_size, val.images.size(0) - s);
+				const int64_t len = std::min(cfg.batch_size, val_x.size(0) - s);
 
-				const auto xb = val.images.narrow(0, s, len);
-				const auto yb = val.labels.narrow(0, s, len).to(device);
+				const auto xb = val_x.narrow(0, s, len);
+				const auto yb = val_y.narrow(0, s, len);
 				const auto xf = svdkd::data::transform_val(xb, norm_v, cfg.resize_to, cfg.out_size,device);
 
 				const auto pred = net->forward(xf).logits.argmax(1);
