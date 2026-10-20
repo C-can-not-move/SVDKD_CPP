@@ -43,15 +43,17 @@ int main(int argc, char** argv)
 			<< "   val " << val.images.sizes() << std::endl;
 
 		// 顺序：先模型，再优化器。
-		auto net = svdkd::model::h_resnet10(/*num_classes=*/10);
+		// auto net = svdkd::model::h_resnet10(/*num_classes=*/10);
+		auto net = svdkd::model::h_resnet34(/*num_classes=*/10);   // h_resnet10 → h_resnet34
 		net->to(device);// 先搬模型，再建优化器 —— 优化器的构建依赖于模型参数。
+
 		torch::optim::Adam optimizer(net->parameters(), torch::optim::AdamOptions(1e-3));
 
 		svdkd::train::TrainConfig cfg;
 		cfg.epochs = 200;
 		cfg.batch_size = 128;
 		cfg.log_every = 100;
-		cfg.save_path = rc.out_dir + "/resnet10-cifar10.pt";
+		cfg.save_path = rc.out_dir + "/resnet34-cifar10.pt";
 
 		cfg.print();
 		// lr 不属于 TrainConfig：它由调用者决定，train_classifier 收到的是优化器本身。

@@ -190,7 +190,7 @@ namespace svdkd::data
 
 		// 先整批转 float。crop 是纯索引 ⇒ 先转后转【结果完全相同】
 		// 唯一的原因是 resize 不接受整数张量。
-		const auto x = to_float01(images).to(device);
+		const auto x = to_float01(images.to(device));
 
 		auto out = torch::empty({ N, C, out_size, out_size } , x.options());
 
@@ -234,7 +234,7 @@ namespace svdkd::data
 		TORCH_CHECK(images.size(1) == static_cast<int64_t>(norm.mean.size()), "transform_val: channel count mismatch");
 
 		// 顺序上于torchvision的处理不同,libtorch的interpolate不接受整数张量
-		auto x = to_float01(images).to(device);       // ToTensor 的那一半
+		auto x = to_float01(images.to(device));       // ToTensor 的那一半
 		x = resize_shorter_side(x, resize_to);        // Resize(resize_to)
 		x = center_crop(x, out_size, out_size);       // CenterCrop(out_size)
 		return normalize(x, norm);                    // Normalize
