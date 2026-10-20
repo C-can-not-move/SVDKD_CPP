@@ -36,27 +36,24 @@ int main()
 		auto train = svdkd::data::load_cifar10_bin(data_dir.string(), /*train=*/true);
 		auto val = svdkd::data::load_cifar10_bin(data_dir.string(), /*train=*/false);
 
-		// 只切一小撮
-		const int64_t kTrain = 640;
-		const int64_t kVal = 320;
-		train.images = train.images.narrow(0, 0, kTrain);
-		train.labels = train.labels.narrow(0, 0, kTrain);
-		val.images = val.images.narrow(0, 0, kVal);
-		val.labels = val.labels.narrow(0, 0, kVal);
-
 		std::cout << "[train] train " << train.images.sizes() << " " << train.images.scalar_type()
 			<< "   val " << val.images.sizes() << std::endl;
 
 		// 顺序：先模型，再优化器。
 		auto net = svdkd::model::h_resnet10(/*num_classes=*/10);
 		net->to(device);// 先搬模型，再建优化器 —— 优化器的构建依赖于模型参数。
-		torch::optim::Adam optimizer(net->parameters(), torch::optim::AdamOptions(1e-4));
+		torch::optim::Adam optimizer(net->parameters(), torch::optim::AdamOptions(1e-3));
 
 		svdkd::train::TrainConfig cfg;
-		cfg.epochs = 100;
-		cfg.batch_size = 32;
-		cfg.log_every = 5;
+		cfg.epochs = 200;
+		cfg.batch_size = 128;
+		cfg.log_every = 100;
 		cfg.save_path = rc.out_dir + "/resnet10-cifar10.pt";
+
+		cfg.print();
+		// lr 不属于 TrainConfig：它由调用者决定，train_classifier 收到的是优化器本身。
+        // 从优化器读回来打，日志里的值就不可能和实际生效的值不一致。
+		std::cout << "[opt] lr = "<< optimizer.param_groups().front().options().get_lr() << '\n';
 
 		const auto r = svdkd::train::train_classifier(
 			net,

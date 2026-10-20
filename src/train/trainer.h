@@ -22,6 +22,17 @@ namespace svdkd::train
 		bool    drop_last = false;     // 照抄 DataLoader 的默认（最后一批留着）
 		int64_t log_every = 50;        // 每多少批打一行
 		std::optional<std::string> save_path;  // 有值就保存模型
+
+		void print() const             // 新增一个打印函数
+		{
+			std::cout << "[train-cfg] epochs     = " << epochs << '\n'
+				<< "[train-cfg] batch_size = " << batch_size << '\n'
+				<< "[train-cfg] out_size   = " << out_size << '\n'
+				<< "[train-cfg] resize_to  = " << resize_to << '\n'
+				<< "[train-cfg] drop_last  = " << (drop_last ? "true" : "false") << '\n'
+				<< "[train-cfg] log_every  = " << log_every << '\n'
+				<< "[train-cfg] save_path  = " << (save_path ? save_path->c_str() : "(none)") << '\n';
+		}             
 	};
 
 	struct TrainResult
