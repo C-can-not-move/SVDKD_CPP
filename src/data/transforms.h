@@ -22,7 +22,8 @@ namespace svdkd::data
     torch::Tensor transform_train(
         const torch::Tensor& images,
         const NormStats& norm,
-        int64_t out_size = 224);
+        int64_t out_size = 224,
+        torch::Device device);
 
     // 验证
     // Resize(resize_to) → CenterCrop(out_size) → ToTensor → Normalize
@@ -31,6 +32,7 @@ namespace svdkd::data
         const torch::Tensor& images,
         const NormStats& norm,
         int64_t resize_to = 256,
-        int64_t out_size = 224);
+        int64_t out_size = 224,
+        torch::Device device);
 
 }  // namespace svdkd::data

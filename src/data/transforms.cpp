@@ -18,9 +18,9 @@ namespace svdkd::data
 		}
 
 		// 把 (C,) 那组参数摊成 (1, C, 1, 1)，然后按照通道广播。
-		torch::Tensor channel_tensor(const std::vector<float>& v)
+		torch::Tensor channel_tensor(const std::vector<float>& v, const torch::TensorOptions& opt)
 		{
-			auto t = torch::empty({ 1, static_cast<int64_t>(v.size()), 1, 1 }, torch::kFloat32);
+			auto t = torch::empty({ 1, static_cast<int64_t>(v.size()), 1, 1 }, opt);
 			for (int64_t c = 0; c < t.size(1); ++c)
 			{
 				t.select(1, c).fill_(v[static_cast<size_t>(c)]);
@@ -37,8 +37,8 @@ namespace svdkd::data
 			TORCH_CHECK(norm.mean.size() == norm.std.size(), "normalize: mean/std length mismatch");
 			TORCH_CHECK(static_cast<int64_t>(norm.mean.size()) == x.size(-3), "normalize: channel count mismatch");
 
-			const auto mean = channel_tensor(norm.mean);
-			const auto std = channel_tensor(norm.std);
+			const auto mean = channel_tensor(norm.mean, x.options());
+			const auto std = channel_tensor(norm.std, x.options());
 			return x.sub(mean).div(std);
 		}
 
@@ -176,7 +176,8 @@ namespace svdkd::data
 	torch::Tensor transform_train(
 		const torch::Tensor& images,
 		const NormStats& norm,
-		int64_t out_size)
+		int64_t out_size,
+		torch::Device device)
 	{
 		TORCH_CHECK(images.dim() == 4, "transform_train: expect (N, C, H, W)");
 		TORCH_CHECK(images.scalar_type() == torch::kUInt8,"transform_train: expect uint8 input, got ", images.scalar_type());
@@ -189,9 +190,9 @@ namespace svdkd::data
 
 		// 先整批转 float。crop 是纯索引 ⇒ 先转后转【结果完全相同】
 		// 唯一的原因是 resize 不接受整数张量。
-		const auto x = to_float01(images);
+		const auto x = to_float01(images).to(device);
 
-		auto out = torch::empty({ N, C, out_size, out_size }, torch::kFloat32);
+		auto out = torch::empty({ N, C, out_size, out_size } , x.options());
 
 		// 逐样本循环，而不是整批共用一组随机数。
 		// torchvision 那边是「一张图走完整条 Compose 再走下一张」，所以
@@ -225,14 +226,15 @@ namespace svdkd::data
 		const torch::Tensor& images,
 		const NormStats& norm,
 		int64_t resize_to,
-		int64_t out_size)
+		int64_t out_size,
+		torch::Device device)
 	{
 		TORCH_CHECK(images.dim() == 4, "transform_val: expect (N, C, H, W)");
 		TORCH_CHECK(images.scalar_type() == torch::kUInt8, "transform_val: expect uint8 input, got ", images.scalar_type());
 		TORCH_CHECK(images.size(1) == static_cast<int64_t>(norm.mean.size()), "transform_val: channel count mismatch");
 
 		// 顺序上于torchvision的处理不同,libtorch的interpolate不接受整数张量
-		auto x = to_float01(images);                  // ToTensor 的那一半
+		auto x = to_float01(images).to(device);       // ToTensor 的那一半
 		x = resize_shorter_side(x, resize_to);        // Resize(resize_to)
 		x = center_crop(x, out_size, out_size);       // CenterCrop(out_size)
 		return normalize(x, norm);                    // Normalize

@@ -75,7 +75,7 @@ namespace svdkd::train
                 const auto xb = train_images.index_select(0, idx);   // // 仍是 CPU uint8 (len,3,32,32)
                 const auto yb = train_labels.index_select(0, idx).to(device);
 
-                const auto xf = transform_train(xb, norm, cfg.out_size).to(device);;
+                const auto xf = transform_train(xb, norm, cfg.out_size,device);
 
 				// 纯净训练循环：前向 ⇒ loss ⇒ 反向 ⇒ 更新
                 optimizer.zero_grad();
@@ -113,7 +113,7 @@ namespace svdkd::train
                     const auto xb = val_images.narrow(0, start, len);
                     const auto yb = val_labels.narrow(0, start, len).to(device);
 
-                    const auto xf = transform_val(xb, norm, cfg.resize_to, cfg.out_size).to(device);
+                    const auto xf = transform_val(xb, norm, cfg.resize_to, cfg.out_size,device);
                     const auto pred = model->forward(xf).logits.argmax(1);
 
                     correct += pred.eq(yb).sum().item<int64_t>();

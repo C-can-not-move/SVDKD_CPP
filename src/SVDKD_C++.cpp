@@ -89,7 +89,7 @@ int main(int argc, char** argv)
 
 				const auto xb = val.images.narrow(0, s, len);
 				const auto yb = val.labels.narrow(0, s, len).to(device);
-				const auto xf = svdkd::data::transform_val(xb, norm_v, cfg.resize_to, cfg.out_size).to(device);
+				const auto xf = svdkd::data::transform_val(xb, norm_v, cfg.resize_to, cfg.out_size,device);
 
 				const auto pred = net->forward(xf).logits.argmax(1);
 				correct += pred.eq(yb).sum().item<int64_t>();
