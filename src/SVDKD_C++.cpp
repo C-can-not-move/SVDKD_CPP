@@ -5,7 +5,7 @@
 
 #include "SVDKD_C++.h"
 
-int main()
+int main(int argc, char** argv)
 {
 #ifdef _WIN32
 	SetConsoleOutputCP(CP_UTF8);
@@ -15,7 +15,10 @@ int main()
 	try
 	{
 		namespace fs = std::filesystem;
-		const auto rc = svdkd::cfg::defaults();
+		
+		auto rc = svdkd::cfg::defaults(); // 需要控制台传入GPU设备号，改成控制台传入的方式
+		if (argc > 1)
+			rc.device_index = std::stoi(argv[1]);  // 只认第一个参数：用哪张卡
 
 		const fs::path data_dir = rc.data_dir;
 		fs::create_directories(rc.out_dir);
