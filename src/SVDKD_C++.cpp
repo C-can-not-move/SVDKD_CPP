@@ -41,6 +41,10 @@ int main(int argc, char** argv)
 
 		std::cout << "[train] train " << train.images.sizes() << " " << train.images.scalar_type()
 			<< "   val " << val.images.sizes() << std::endl;
+		const auto train_x = train.images.to(device);   // 50000×3×32×32 uint8 = 153.6 MB
+		const auto train_y = train.labels.to(device);   // 400 KB
+		const auto val_x = val.images.to(device);     // 10000 张 = 30.7 MB
+		const auto val_y = val.labels.to(device);     // 80 KB
 
 		// 顺序：先模型，再优化器。
 		// auto net = svdkd::model::h_resnet10(/*num_classes=*/10);

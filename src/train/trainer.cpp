@@ -70,7 +70,7 @@ namespace svdkd::train
                     break;
                 }
 
-                const auto idx = perm.narrow(0, start, len);// idx 装的是「编号」—— 不是「位置」
+                const auto idx = perm.narrow(0, start, len).to(device);// idx 装的是「编号」—— 不是「位置」
 
                 const auto xb = train_images.index_select(0, idx);   // // 仍是 CPU uint8 (len,3,32,32)
                 const auto yb = train_labels.index_select(0, idx).to(device);
