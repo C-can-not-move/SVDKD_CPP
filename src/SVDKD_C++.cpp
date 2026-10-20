@@ -66,10 +66,10 @@ int main(int argc, char** argv)
 
 		const auto r = svdkd::train::train_classifier(
 			net,
-			train.images,
-			train.labels,
-			val.images,
-			val.labels,
+			train_x,
+			train_y,
+			val_x,
+			val_y,
 			optimizer,
 			cfg);
 
