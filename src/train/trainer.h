@@ -66,7 +66,7 @@ namespace svdkd::train
 	// 蒸馏怎么配置。用于整理训练函数。
 	struct DistillOpts
 	{
-		svdkd::model::ResNet teacher;
+		svdkd::model::ResNet teacher = nullptr;
 		double T = 5.0;
 		double lambda_stu = 0.0;
 	};
