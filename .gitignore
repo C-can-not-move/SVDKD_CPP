@@ -366,3 +366,4 @@ FodyWeavers.xsd
 dataset/
 test_tools/refs/
 run/
+out/
