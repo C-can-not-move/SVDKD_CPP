@@ -35,6 +35,17 @@ namespace svdkd::train
 		}             
 	};
 
+	struct EvalResult
+	{
+		int64_t correct = 0;
+		int64_t total = 0;
+
+		double acc() const
+		{
+			return total > 0 ? static_cast<double>(correct) / static_cast<double>(total) : 0.0;
+		}
+	};
+
 	struct TrainResult
 	{
 		double  best_val_acc = 0.0;   // 最好那一次的验证准确率
@@ -52,6 +63,14 @@ namespace svdkd::train
 
 	};
 
+	// 蒸馏怎么配置。用于整理训练函数。
+	struct DistillOpts
+	{
+		svdkd::model::ResNet teacher;
+		double T = 5.0;
+		double lambda_stu = 0.0;
+	};
+
 	// 从头训一个分类器。
 	// model按值传是有意的：ResNet 是 ModuleHolder，内部是 shared_ptr ⇒拷贝共享同一份实现 ⇒ 函数里的训练会改到调用者的模型。
 	// 数据是整批张量，函数内部自己洗牌切片（torch::randperm + index_select），不用 DataLoader。
@@ -61,5 +80,21 @@ namespace svdkd::train
 		const torch::Tensor& val_images,
 		const torch::Tensor& val_labels,
 		torch::optim::Optimizer& optimizer, 
+		const TrainConfig& cfg);
+
+	// 蒸馏训练。学生模型按值传，教师模型按引用传。
+	TrainResult train_distill(svdkd::model::ResNet student,
+		const torch::Tensor& train_images,
+		const torch::Tensor& train_labels,
+		const torch::Tensor& val_images,
+		const torch::Tensor& val_labels,
+		torch::optim::Optimizer& optimizer,
+		const TrainConfig& cfg,
+		DistillOpts Dopts);
+
+	// 评估一个分类器在验证集上的准确率。没有训练循环。
+	EvalResult evaluate(svdkd::model::ResNet model,          // 按值：holder 共享 impl
+		const torch::Tensor& images,
+		const torch::Tensor& labels,
 		const TrainConfig& cfg);
 }  // namespace svdkd::train
