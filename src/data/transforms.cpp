@@ -163,6 +163,7 @@ namespace svdkd::data
 		}
 	}
 	// dataload_cf100.py L11：
+	// 这里用的是imagenet的均值方差，和torchvision的默认值一致。但是实际上应该用cifar10的均值方差。
 	// Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 	NormStats imagenet_norm()
 	{
